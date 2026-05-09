@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Evan Studio — Web Design for Small Business</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Instrument+Serif:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+<script src="https://js.stripe.com/v3/"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root {
+  --w: #ffffff;
+  --off: #f8f6f2;
+  --cream: #f0ece4;
+  --blk: #0d0d0d;
+  --dark: #1c1c1c;
+  --mid: #707070;
+  --lt: #c4c0bb;
+  --bdr: #e8e4de;
+  --org: #e85d2a;
+  --blu: #1a3de8;
+  --grn: #1cb87a;
+  --sh: 0 2px 24px rgba(0,0,0,.07);
+  --sh-lg: 0 8px 48px rgba(0,0,0,.12);
+  --r: 14px;
+  --rs: 8px;
+  --tr: .22s cubic-bezier(.4,0,.2,1);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--w);color:var(--blk);overflow-x:hidden;line-height:1.65}
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:var(--off)}
+::-webkit-scrollbar-thumb{background:var(--blk);border-radius:2px}
+img{display:block;max-width:100%}
+a{text-decoration:none;color:inherit}
+button{font-family:inherit;cursor:pointer;border:none;outline:none}
+.container{width:100%;max-width:1160px;margin:0 auto;padding:0 5vw}
+.hide{display:none!important}
+
+/* NAV */
+#nav{position:fixed;top:0;left:0;right:0;z-index:200;height:66px;display:flex;align-items:center;justify-content:space-between;padding:0 5vw;background:rgba(255,255,255,.85);backdrop-filter:blur(20px);border-bottom:1px solid transparent;transition:border-color var(--tr),background var(--tr)}
+#nav.scrolled{border-color:var(--bdr);background:rgba(255,255,255,.97)}
+.nav-logo{font-family:'Bebas Neue',sans-serif;font-size:1.7rem;letter-spacing:.06em;color:var(--blk)}
+.nav-logo em{color:var(--org);font-style:normal}
+.nav-links{display:flex;gap:2.2rem;list-style:none;align-items:center}
+.nav-links a{font-size:.82rem;font-weight:500;letter-spacing:.04em;color:var(--dark);position:relative;transition:color var(--tr)}
+.nav-links a::after{content:'';position:absolute;bottom:-4px;left:0;right:0;height:1.5px;background:var(--org);transform:scaleX(0);transform-origin:left;transition:transform .25s ease}
+.nav-links a:hover{color:var(--org)}
+.nav-links a:hover::after{transform:scaleX(1)}
+.nav-right{display:flex;gap:.6rem;align-items:center}
+.btn{display:inline-flex;align-items:center;gap:.4rem;padding:.6rem 1.3rem;font-size:.82rem;font-weight:600;letter-spacing:.03em;border-radius:100px;transition:all var(--tr);white-space:nowrap;cursor:pointer}
+.btn-dark{background:var(--blk);color:var(--w)}
+.btn-dark:hover{background:var(--org);transform:translateY(-1px)}
+.btn-outline{background:transparent;color:var(--blk);border:1.5px solid var(--bdr)}
+.btn-outline:hover{border-color:var(--blk);background:var(--blk);color:var(--w)}
+.btn-orange{background:var(--org);color:var(--w)}
+.btn-orange:hover{background:#c94e20;transform:translateY(-2px);box-shadow:0 8px 24px rgba(232,93,42,.3)}
+.btn-lg{padding:.85rem 2rem;font-size:.9rem}
+#cart-btn{position:relative;background:var(--blk);color:var(--w);padding:.52rem .95rem;border-radius:100px;font-size:.82rem;font-weight:600;display:flex;align-items:center;gap:.45rem;transition:all var(--tr)}
+#cart-btn:hover{background:var(--org)}
+#cart-count{background:var(--org);color:var(--w);font-size:.65rem;font-weight:700;width:17px;height:17px;border-radius:50%;display:flex;align-items:center;justify-content:center;position:absolute;top:-5px;right:-5px;transition:transform .2s}
+#cart-count.pop{animation:pop .25s ease}
+@keyframes pop{0%,100%{transform:scale(1)}50%{transform:scale(1.4)}}
+.hamburger{display:none;flex-direction:column;gap:5px;background:none;padding:.4rem}
+.hamburger span{width:22px;height:2px;background:var(--blk);border-radius:2px;transition:all .3s;display:block}
+.hamburger.open span:nth-child(1){transform:translateY(7px) rotate(45deg)}
+.hamburger.open span:nth-child(2){opacity:0}
+.hamburger.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+#mobile-nav{display:none;position:fixed;inset:0;z-index:150;background:var(--w);padding-top:80px;flex-direction:column;align-items:center;gap:2rem;font-size:1.8rem;font-family:'Bebas Neue',sans-serif;letter-spacing:.05em}
+#mobile-nav.open{display:flex}
+#mobile-nav a:hover{color:var(--org)}
+#user-btn{font-size:.82rem;font-weight:600;padding:.52rem .95rem;border-radius:100px;background:var(--off);border:1.5px solid var(--bdr);cursor:pointer;transition:all var(--tr);display:flex;align-items:center;gap:.45rem}
+#user-btn:hover{border-color:var(--blk);background:var(--blk);color:var(--w)}
+
+/* HERO */
+#hero{min-height:100svh;display:flex;align-items:center;padding-top:66px;position:relative;overflow:hidden;background:var(--w)}
+#hero::before{content:'';position:absolute;inset:0;z-index:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.025'/%3E%3C/svg%3E");background-size:200px;pointer-events:none;opacity:.5}
+.hero-bg-text{position:absolute;font-family:'Bebas Neue',sans-serif;font-size:clamp(120px,22vw,340px);color:rgba(0,0,0,.025);letter-spacing:.02em;white-space:nowrap;top:50%;transform:translateY(-50%);right:-2vw;user-select:none;pointer-events:none;z-index:0;animation:drift 18s ease-in-out infinite alternate}
+@keyframes drift{from{transform:translateY(-50%) translateX(0)}to{transform:translateY(-52%) translateX(-20px)}}
+.hero-inner{position:relative;z-index:1;display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center;padding:6rem 0 4rem}
+.hero-tag{display:inline-flex;align-items:center;gap:.5rem;background:var(--cream);border:1px solid var(--bdr);padding:.32rem .85rem;border-radius:100px;font-size:.73rem;font-weight:600;letter-spacing:.07em;color:var(--mid);text-transform:uppercase;margin-bottom:1.5rem;animation:fadeUp .6s ease both}
+.hero-dot{width:6px;height:6px;border-radius:50%;background:var(--grn);animation:blink 2s ease infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+h1.hero-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(3.2rem,6.8vw,6rem);line-height:.95;letter-spacing:.01em;animation:fadeUp .7s .1s ease both}
+h1.hero-title em{font-style:italic;font-family:'Instrument Serif',serif;color:var(--org)}
+.hero-sub{margin-top:1.5rem;font-size:1.05rem;color:var(--mid);font-weight:400;max-width:440px;animation:fadeUp .7s .2s ease both}
+.hero-actions{display:flex;gap:.75rem;flex-wrap:wrap;margin-top:2.2rem;animation:fadeUp .7s .3s ease both}
+.hero-stats{display:flex;gap:2rem;margin-top:3rem;animation:fadeUp .7s .4s ease both}
+.stat-item{border-left:2px solid var(--org);padding-left:1rem}
+.stat-num{font-family:'Bebas Neue',sans-serif;font-size:2rem;letter-spacing:.03em}
+.stat-label{font-size:.73rem;color:var(--mid);font-weight:500;letter-spacing:.04em}
+.hero-visual{position:relative;animation:fadeUp .8s .2s ease both}
+.hero-card{background:var(--blk);border-radius:24px;padding:2.5rem;color:var(--w);position:relative;overflow:hidden}
+.hero-card::before{content:'';position:absolute;top:-60px;right:-60px;width:200px;height:200px;background:radial-gradient(circle,rgba(232,93,42,.35) 0%,transparent 70%);border-radius:50%}
+.hero-card-label{font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.4);font-weight:600;margin-bottom:1rem}
+.hero-card-title{font-family:'Bebas Neue',sans-serif;font-size:2.4rem;letter-spacing:.04em;line-height:1;margin-bottom:.5rem}
+.hero-card-sub{font-size:.85rem;color:rgba(255,255,255,.55)}
+.hero-card-items{margin:1.5rem 0;display:flex;flex-direction:column;gap:.7rem}
+.hci{display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,.06);border-radius:10px;padding:.75rem 1rem;font-size:.82rem}
+.hci-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.hci span{color:rgba(255,255,255,.7)}
+.hci-price{font-weight:600;color:var(--w)}
+.hero-card-btn{width:100%;padding:.8rem;background:var(--org);color:var(--w);border-radius:10px;font-size:.85rem;font-weight:600;border:none;cursor:pointer;transition:all var(--tr)}
+.hero-card-btn:hover{background:#c94e20;transform:translateY(-1px)}
+.badge-float{position:absolute;bottom:-16px;left:2rem;background:var(--grn);color:var(--w);border-radius:100px;padding:.5rem 1.1rem;font-size:.75rem;font-weight:700;display:flex;align-items:center;gap:.4rem;box-shadow:0 8px 24px rgba(28,184,122,.3);animation:float 3s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}
+
+/* MARQUEE */
+.marquee-wrap{background:var(--blk);padding:.9rem 0;overflow:hidden;border-top:1px solid #222;border-bottom:1px solid #222}
+.marquee-track{display:flex;gap:3rem;white-space:nowrap;animation:marquee 24s linear infinite}
+.marquee-track:hover{animation-play-state:paused}
+@keyframes marquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.mi{font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:.1em;color:rgba(255,255,255,.5);display:flex;align-items:center;gap:1.5rem}
+.mi-dot{width:5px;height:5px;border-radius:50%;background:var(--org);flex-shrink:0}
+
+/* SECTIONS */
+section{padding:7rem 0}
+.section-tag{display:inline-block;font-size:.72rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--org);margin-bottom:1rem}
+.section-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(2.2rem,5vw,4rem);line-height:1;letter-spacing:.02em;margin-bottom:1.2rem}
+.section-title em{font-family:'Instrument Serif',serif;font-style:italic;color:var(--org)}
+.section-sub{font-size:1rem;color:var(--mid);max-width:500px;line-height:1.7}
+.reveal{opacity:0;transform:translateY(30px);transition:opacity .6s ease,transform .6s ease}
+.reveal.visible{opacity:1;transform:none}
+.rd1{transition-delay:.1s}.rd2{transition-delay:.2s}.rd3{transition-delay:.3s}
+
+/* ABOUT */
+#about{background:var(--off)}
+.about-grid{display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:center}
+.about-img-wrap{position:relative;aspect-ratio:3/4;border-radius:24px;overflow:hidden;background:var(--cream)}
+.about-placeholder{width:100%;height:100%;background:linear-gradient(135deg,var(--cream) 0%,#e0d8cc 100%);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:8rem;color:var(--lt);letter-spacing:.05em}
+.about-overlay{position:absolute;bottom:1.5rem;left:1.5rem;right:1.5rem;background:var(--blk);color:var(--w);border-radius:14px;padding:1.2rem 1.5rem}
+.about-overlay strong{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:.04em;display:block}
+.about-overlay span{font-size:.78rem;color:rgba(255,255,255,.5)}
+.about-features{margin-top:2.5rem;display:grid;grid-template-columns:1fr 1fr;gap:1.2rem}
+.af{background:var(--w);border:1px solid var(--bdr);border-radius:var(--r);padding:1.2rem 1.3rem;transition:all var(--tr)}
+.af:hover{border-color:var(--org);box-shadow:0 4px 20px rgba(232,93,42,.1);transform:translateY(-2px)}
+.af-icon{font-size:1.4rem;margin-bottom:.6rem}
+.af-title{font-size:.85rem;font-weight:600;margin-bottom:.25rem}
+.af-desc{font-size:.78rem;color:var(--mid)}
+
+/* PROCESS */
+#process{background:var(--w)}
+.process-steps{display:grid;grid-template-columns:repeat(4,1fr);gap:2rem;margin-top:4rem;position:relative}
+.process-steps::before{content:'';position:absolute;top:28px;left:10%;right:10%;height:1px;background:linear-gradient(to right,transparent,var(--bdr) 20%,var(--bdr) 80%,transparent);z-index:0}
+.ps{position:relative;z-index:1;text-align:center}
+.ps-num{width:56px;height:56px;border-radius:50%;background:var(--blk);color:var(--w);font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:.04em;display:flex;align-items:center;justify-content:center;margin:0 auto 1.2rem;border:3px solid var(--w);box-shadow:0 0 0 2px var(--bdr);transition:all var(--tr)}
+.ps:hover .ps-num{background:var(--org);box-shadow:0 0 0 2px var(--org),0 8px 20px rgba(232,93,42,.3)}
+.ps-title{font-weight:600;font-size:.9rem;margin-bottom:.5rem}
+.ps-desc{font-size:.8rem;color:var(--mid);line-height:1.6}
+
+/* PLANS */
+#plans{background:var(--off)}
+.plans-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;margin-top:4rem;align-items:start}
+.plan-card{background:var(--w);border:1.5px solid var(--bdr);border-radius:24px;padding:2.2rem;position:relative;overflow:hidden;transition:all .3s ease}
+.plan-card:hover{transform:translateY(-6px);box-shadow:var(--sh-lg)}
+.plan-card.featured{background:var(--blk);color:var(--w);border-color:var(--blk);transform:scale(1.04)}
+.plan-card.featured:hover{transform:scale(1.04) translateY(-6px)}
+.plan-badge{position:absolute;top:1.4rem;right:1.4rem;background:var(--org);color:var(--w);font-size:.65rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:.28rem .7rem;border-radius:100px}
+.plan-name{font-family:'Bebas Neue',sans-serif;font-size:1.5rem;letter-spacing:.05em;margin-bottom:.5rem}
+.plan-desc{font-size:.82rem;color:var(--mid);margin-bottom:1.8rem;line-height:1.6}
+.featured .plan-desc{color:rgba(255,255,255,.5)}
+.plan-price{display:flex;align-items:baseline;gap:.3rem;margin-bottom:1.8rem}
+.plan-price-num{font-family:'Bebas Neue',sans-serif;font-size:3.2rem;letter-spacing:.02em}
+.plan-price-cur{font-size:1.2rem;font-weight:600;margin-bottom:.4rem}
+.plan-price-per{font-size:.8rem;color:var(--mid)}
+.featured .plan-price-per{color:rgba(255,255,255,.4)}
+.plan-feats{list-style:none;margin-bottom:2rem;display:flex;flex-direction:column;gap:.75rem}
+.plan-feats li{display:flex;align-items:flex-start;gap:.65rem;font-size:.83rem;line-height:1.5}
+.featured .plan-feats li{color:rgba(255,255,255,.8)}
+.chk{width:18px;height:18px;border-radius:50%;background:rgba(28,184,122,.15);color:var(--grn);display:flex;align-items:center;justify-content:center;font-size:.65rem;flex-shrink:0;margin-top:1px;font-weight:700}
+.featured .chk{background:rgba(28,184,122,.2)}
+.plan-btn{width:100%;padding:.9rem;border-radius:100px;font-size:.85rem;font-weight:600;border:none;cursor:pointer;transition:all var(--tr)}
+.pbo{background:transparent;color:var(--blk);border:1.5px solid var(--bdr)}.pbo:hover{border-color:var(--blk);background:var(--blk);color:var(--w)}
+.pborg{background:var(--org);color:var(--w)}.pborg:hover{background:#c94e20;transform:translateY(-1px);box-shadow:0 8px 24px rgba(232,93,42,.3)}
+.pbdk{background:var(--blk);color:var(--w)}.pbdk:hover{background:var(--org);transform:translateY(-1px)}
+
+/* QUOTE */
+#quote{background:var(--w)}
+.quote-wrap{display:grid;grid-template-columns:1fr 1.2fr;gap:5rem;align-items:center}
+.quote-form-box{background:var(--off);border:1px solid var(--bdr);border-radius:24px;padding:2.8rem}
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.fg-row{display:flex;flex-direction:column;gap:.45rem}
+.fg-row.full{grid-column:1/-1}
+label{font-size:.78rem;font-weight:600;letter-spacing:.03em;color:var(--dark)}
+input,textarea,select{width:100%;padding:.72rem 1rem;background:var(--w);border:1.5px solid var(--bdr);border-radius:var(--rs);font-family:inherit;font-size:.88rem;color:var(--blk);transition:border-color var(--tr);-webkit-appearance:none}
+input:focus,textarea:focus,select:focus{outline:none;border-color:var(--blk)}
+textarea{resize:vertical;min-height:110px;line-height:1.6}
+select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none'%3E%3Cpath stroke='%23707070' stroke-width='1.5' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 1rem center;background-size:12px}
+.form-submit{width:100%;padding:.88rem;background:var(--blk);color:var(--w);border-radius:100px;font-size:.88rem;font-weight:600;border:none;cursor:pointer;margin-top:.5rem;transition:all var(--tr);position:relative;overflow:hidden}
+.form-submit:hover{background:var(--org);transform:translateY(-1px)}
+.form-submit::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.15),transparent);transform:translateX(-100%);transition:transform .5s ease}
+.form-submit:hover::after{transform:translateX(100%)}
+.quote-success{background:rgba(28,184,122,.08);border:1.5px solid rgba(28,184,122,.3);border-radius:var(--r);padding:1.5rem;text-align:center;color:var(--grn);font-weight:600;display:none;margin-top:1rem}
+.qf-list{margin-top:2rem;display:flex;flex-direction:column;gap:1rem}
+.qf-item{display:flex;gap:1rem;align-items:flex-start}
+.qf-icon{width:40px;height:40px;border-radius:10px;background:var(--cream);border:1px solid var(--bdr);display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0}
+.qf-title{font-weight:600;font-size:.88rem;margin-bottom:.2rem}
+.qf-desc{font-size:.8rem;color:var(--mid)}
+
+/* TESTIMONIALS */
+#testimonials{background:var(--blk);color:var(--w);padding:6rem 0}
+#testimonials .section-tag{color:rgba(255,255,255,.35)}
+#testimonials .section-title{color:var(--w)}
+.testi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;margin-top:3.5rem}
+.tc{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:18px;padding:1.8rem;transition:all var(--tr)}
+.tc:hover{background:rgba(255,255,255,.08);border-color:rgba(232,93,42,.4);transform:translateY(-3px)}
+.tc-stars{color:var(--org);letter-spacing:.1rem;font-size:.9rem;margin-bottom:1rem}
+.tc-text{font-size:.88rem;color:rgba(255,255,255,.65);line-height:1.7;margin-bottom:1.5rem}
+.tc-author{display:flex;align-items:center;gap:.8rem}
+.tc-av{width:38px;height:38px;border-radius:50%;background:var(--org);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:1rem;color:var(--w)}
+.tc-name{font-size:.83rem;font-weight:600;color:var(--w)}
+.tc-biz{font-size:.75rem;color:rgba(255,255,255,.35)}
+
+/* FAQ */
+#faq{background:var(--off)}
+.faq-list{max-width:720px;margin:3.5rem auto 0;display:flex;flex-direction:column;gap:.8rem}
+.faq-item{background:var(--w);border:1.5px solid var(--bdr);border-radius:var(--r);overflow:hidden;transition:border-color var(--tr)}
+.faq-item:hover,.faq-item.open{border-color:var(--blk)}
+.faq-q{width:100%;display:flex;justify-content:space-between;align-items:center;padding:1.1rem 1.4rem;background:none;border:none;cursor:pointer;font-family:inherit;font-size:.9rem;font-weight:600;text-align:left;transition:color var(--tr)}
+.faq-item.open .faq-q{color:var(--org)}
+.faq-icon{font-size:1.2rem;font-weight:400;color:var(--mid);transition:transform .3s,color .2s;flex-shrink:0}
+.faq-item.open .faq-icon{transform:rotate(45deg);color:var(--org)}
+.faq-a{max-height:0;overflow:hidden;transition:max-height .35s ease}
+.faq-item.open .faq-a{max-height:300px}
+.faq-a-inner{padding:0 1.4rem 1.2rem;font-size:.85rem;color:var(--mid);line-height:1.75}
+
+/* FOOTER */
+footer{background:var(--blk);color:var(--w);padding:4rem 0 2rem}
+.footer-top{display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;gap:3rem;padding-bottom:3rem;border-bottom:1px solid rgba(255,255,255,.1)}
+.footer-brand p{font-size:.82rem;color:rgba(255,255,255,.4);line-height:1.7;max-width:240px;margin-top:.8rem}
+.fc h4{font-size:.73rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:1.1rem}
+.fc a{display:block;font-size:.82rem;color:rgba(255,255,255,.5);margin-bottom:.6rem;transition:color var(--tr)}
+.fc a:hover{color:var(--org)}
+.footer-bottom{display:flex;justify-content:space-between;align-items:center;padding-top:1.5rem;font-size:.78rem;color:rgba(255,255,255,.3)}
+
+/* MODALS */
+.modal-overlay{position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.55);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:1rem;opacity:0;pointer-events:none;transition:opacity .25s ease}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal{background:var(--w);border-radius:24px;width:100%;max-width:480px;max-height:90svh;overflow-y:auto;transform:scale(.96) translateY(12px);transition:transform .28s cubic-bezier(.34,1.56,.64,1)}
+.modal-overlay.open .modal{transform:scale(1) translateY(0)}
+.modal-wide{max-width:740px}
+.modal-hdr{padding:1.6rem 1.8rem 0;display:flex;align-items:center;justify-content:space-between}
+.modal-ttl{font-family:'Bebas Neue',sans-serif;font-size:1.7rem;letter-spacing:.04em}
+.modal-x{width:34px;height:34px;border-radius:50%;background:var(--off);border:1.5px solid var(--bdr);display:flex;align-items:center;justify-content:center;font-size:1rem;color:var(--mid);cursor:pointer;transition:all var(--tr)}
+.modal-x:hover{background:var(--blk);color:var(--w);border-color:var(--blk)}
+.modal-body{padding:1.5rem 1.8rem 2rem}
+
+/* CART */
+.cart-empty{text-align:center;padding:3rem 0;color:var(--mid);font-size:.9rem}
+.cart-empty-icon{font-size:2.5rem;margin-bottom:.8rem;opacity:.3}
+.cart-items{display:flex;flex-direction:column;gap:.8rem;margin-bottom:1.5rem}
+.cart-item{display:flex;gap:1rem;align-items:center;background:var(--off);border:1px solid var(--bdr);border-radius:var(--rs);padding:.9rem 1rem}
+.ci-icon{width:40px;height:40px;border-radius:8px;background:var(--blk);color:var(--w);display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0}
+.ci-info{flex:1}
+.ci-name{font-weight:600;font-size:.88rem}
+.ci-price{font-size:.8rem;color:var(--mid)}
+.ci-rm{background:none;border:none;cursor:pointer;color:var(--lt);font-size:1.1rem;padding:.2rem;transition:color var(--tr)}
+.ci-rm:hover{color:var(--org)}
+.cart-total{display:flex;justify-content:space-between;align-items:center;font-weight:600;padding:1rem 0;border-top:1px solid var(--bdr);margin-bottom:1rem}
+.cart-total-num{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;letter-spacing:.03em}
+
+/* AUTH */
+.auth-tabs{display:flex;background:var(--off);border-radius:100px;padding:4px;margin-bottom:1.5rem}
+.auth-tab{flex:1;padding:.6rem;border-radius:100px;font-size:.82rem;font-weight:600;background:none;border:none;cursor:pointer;color:var(--mid);transition:all .2s}
+.auth-tab.active{background:var(--blk);color:var(--w)}
+.auth-div{display:flex;align-items:center;gap:1rem;margin:1.2rem 0;color:var(--lt);font-size:.78rem}
+.auth-div::before,.auth-div::after{content:'';flex:1;height:1px;background:var(--bdr)}
+.btn-guest{width:100%;padding:.8rem;border-radius:100px;font-size:.84rem;font-weight:600;background:transparent;border:1.5px solid var(--bdr);cursor:pointer;transition:all var(--tr)}
+.btn-guest:hover{border-color:var(--blk);background:var(--off)}
+.auth-err{background:rgba(232,93,42,.08);border:1px solid rgba(232,93,42,.25);border-radius:var(--rs);padding:.75rem 1rem;font-size:.8rem;color:var(--org);margin-bottom:.8rem;display:none}
+
+/* CHECKOUT */
+.co-grid{display:grid;grid-template-columns:1fr 1fr;gap:2rem}
+.co-summary{background:var(--off);border-radius:var(--r);padding:1.5rem;border:1px solid var(--bdr)}
+.co-summary h3{font-weight:700;margin-bottom:1rem;font-size:.9rem}
+.sl{display:flex;justify-content:space-between;align-items:center;font-size:.84rem;padding:.4rem 0;color:var(--mid)}
+.sl.tot{border-top:1.5px solid var(--bdr);margin-top:.5rem;padding-top:.7rem;font-weight:700;color:var(--blk);font-size:.95rem}
+#stripe-el{padding:.8rem 1rem;border:1.5px solid var(--bdr);border-radius:var(--rs);background:var(--w);margin-bottom:1rem;transition:border-color var(--tr)}
+#stripe-el.StripeElement--focus{border-color:var(--blk)}
+#pay-msg{font-size:.8rem;color:var(--org);margin-top:.5rem;min-height:1.2em}
+
+/* TOAST */
+.toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(20px);background:var(--blk);color:var(--w);padding:.75rem 1.5rem;border-radius:100px;font-size:.85rem;font-weight:500;z-index:500;opacity:0;transition:all .3s ease;white-space:nowrap;pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* RESPONSIVE */
+@media(max-width:900px){
+  .hero-inner{grid-template-columns:1fr;gap:3rem;text-align:center}
+  .hero-sub,.hero-actions,.hero-stats{margin-left:auto;margin-right:auto;justify-content:center}
+  .hero-visual{max-width:420px;margin:0 auto}
+  .about-grid{grid-template-columns:1fr}
+  .about-img-wrap{aspect-ratio:4/3;max-width:400px;margin:0 auto}
+  .about-features{grid-template-columns:1fr}
+  .process-steps{grid-template-columns:1fr 1fr}
+  .process-steps::before{display:none}
+  .plans-grid{grid-template-columns:1fr;max-width:420px;margin-left:auto;margin-right:auto}
+  .plan-card.featured{transform:none}
+  .plan-card.featured:hover{transform:translateY(-6px)}
+  .quote-wrap{grid-template-columns:1fr}
+  .testi-grid{grid-template-columns:1fr}
+  .footer-top{grid-template-columns:1fr 1fr;gap:2rem}
+  .co-grid{grid-template-columns:1fr}
+  .nav-links{display:none}
+  .hamburger{display:flex}
+}
+@media(max-width:600px){
+  section{padding:5rem 0}
+  .process-steps{grid-template-columns:1fr}
+  .fg{grid-template-columns:1fr}
+  .footer-top{grid-template-columns:1fr}
+  .footer-bottom{flex-direction:column;gap:.5rem;text-align:center}
+  .modal-body,.modal-hdr{padding-left:1.2rem;padding-right:1.2rem}
+  .quote-form-box{padding:1.8rem 1.4rem}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="nav">
+  <a href="#" class="nav-logo">EVAN<em>.</em>STUDIO</a>
+  <ul class="nav-links">
+    <li><a href="#about">About</a></li>
+    <li><a href="#process">Process</a></li>
+    <li><a href="#plans">Plans</a></li>
+    <li><a href="#quote">Get a Quote</a></li>
+    <li><a href="#faq">FAQ</a></li>
+  </ul>
+  <div class="nav-right">
+    <button id="user-btn" onclick="openAuth()">⚡ Sign In</button>
+    <button id="cart-btn" onclick="openCart()">
+      🛒 Cart
+      <span id="cart-count" class="hide">0</span>
+    </button>
+    <button class="hamburger" id="hamburger" onclick="toggleMobile()">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<!-- MOBILE NAV -->
+<div id="mobile-nav">
+  <a href="#about" onclick="closeMobile()">About</a>
+  <a href="#process" onclick="closeMobile()">Process</a>
+  <a href="#plans" onclick="closeMobile()">Plans</a>
+  <a href="#quote" onclick="closeMobile()">Get a Quote</a>
+  <a href="#faq" onclick="closeMobile()">FAQ</a>
+</div>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-bg-text">WEB</div>
+  <div class="container">
+    <div class="hero-inner">
+      <div>
+        <div class="hero-tag"><span class="hero-dot"></span>Available for new projects</div>
+        <h1 class="hero-title">Your Business<br>Deserves a<br><em>Great Website</em></h1>
+        <p class="hero-sub">I build fast, modern websites for small businesses — from local shops to service companies. No templates, no fluff. Just clean code that converts.</p>
+        <div class="hero-actions">
+          <a href="#plans" class="btn btn-dark btn-lg">View Plans</a>
+          <a href="#quote" class="btn btn-outline btn-lg">Free Quote</a>
+        </div>
+        <div class="hero-stats">
+          <div class="stat-item"><div class="stat-num">50+</div><div class="stat-label">Sites Delivered</div></div>
+          <div class="stat-item"><div class="stat-num">100%</div><div class="stat-label">Satisfaction</div></div>
+          <div class="stat-item"><div class="stat-num">3–7</div><div class="stat-label">Day Turnaround</div></div>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <div class="hero-card">
+          <div class="hero-card-label">Popular Plans</div>
+          <div class="hero-card-title">Ready to Go Live</div>
+          <div class="hero-card-sub">Pick a plan, launch fast</div>
+          <div class="hero-card-items">
+            <div class="hci"><div style="display:flex;align-items:center;gap:.7rem"><div class="hci-dot" style="background:#60a5fa"></div><span>Starter Site</span></div><span class="hci-price">€499</span></div>
+            <div class="hci"><div style="display:flex;align-items:center;gap:.7rem"><div class="hci-dot" style="background:#e85d2a"></div><span>Growth Package</span></div><span class="hci-price">€999</span></div>
+            <div class="hci"><div style="display:flex;align-items:center;gap:.7rem"><div class="hci-dot" style="background:#1cb87a"></div><span>Premium Store</span></div><span class="hci-price">€1,999</span></div>
+          </div>
+          <button class="hero-card-btn" onclick="document.getElementById('plans').scrollIntoView({behavior:'smooth'})">See All Plans →</button>
+        </div>
+        <div class="badge-float">✓ Free hosting setup included</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MARQUEE -->
+<div class="marquee-wrap"><div class="marquee-track" id="mtrack"></div></div>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="container">
+    <div class="about-grid">
+      <div class="about-img-wrap reveal">
+        <div class="about-placeholder">E</div>
+        <div class="about-overlay"><strong>Evan</strong><span>Founder &amp; Web Developer</span></div>
+      </div>
+      <div class="about-text">
+        <span class="section-tag reveal">About Me</span>
+        <h2 class="section-title reveal rd1">Hi, I'm <em>Evan</em></h2>
+        <p class="section-sub reveal rd2">I'm a web developer specialising in building clean, high-performance websites for small businesses across Ireland and beyond. Whether you need a simple landing page or a fully featured online store, I handle everything from design to deployment.</p>
+        <p class="section-sub reveal rd2" style="margin-top:1rem;max-width:100%">I believe every small business deserves a website that looks premium — without the agency price tag. I work directly with you, no middlemen, just results.</p>
+        <div class="about-features reveal rd3">
+          <div class="af"><div class="af-icon">🎨</div><div class="af-title">Custom Design</div><div class="af-desc">Built for your brand, not from a template library</div></div>
+          <div class="af"><div class="af-icon">⚡</div><div class="af-title">Fast Delivery</div><div class="af-desc">Most sites live in under a week</div></div>
+          <div class="af"><div class="af-icon">📱</div><div class="af-title">Mobile First</div><div class="af-desc">Perfect on every screen size</div></div>
+          <div class="af"><div class="af-icon">🔒</div><div class="af-title">SEO &amp; Security</div><div class="af-desc">Built to rank and built to last</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROCESS -->
+<section id="process">
+  <div class="container" style="text-align:center">
+    <span class="section-tag reveal">How It Works</span>
+    <h2 class="section-title reveal rd1">From Idea to <em>Live</em></h2>
+    <p class="section-sub reveal rd2" style="margin:0 auto">A simple, stress-free process designed around you.</p>
+    <div class="process-steps reveal rd2">
+      <div class="ps"><div class="ps-num">01</div><div class="ps-title">Get in Touch</div><div class="ps-desc">Fill out the quote form or grab a plan. We'll have a quick chat about your goals.</div></div>
+      <div class="ps"><div class="ps-num">02</div><div class="ps-title">Design Phase</div><div class="ps-desc">I design your site — you approve it. Revisions included until you love it.</div></div>
+      <div class="ps"><div class="ps-num">03</div><div class="ps-title">Build &amp; Test</div><div class="ps-desc">Your site is built and tested across all devices and browsers.</div></div>
+      <div class="ps"><div class="ps-num">04</div><div class="ps-title">Go Live 🚀</div><div class="ps-desc">Launch day! I handle hosting setup and guide you through managing your new site.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- PLANS -->
+<section id="plans">
+  <div class="container" style="text-align:center">
+    <span class="section-tag reveal">Pricing Plans</span>
+    <h2 class="section-title reveal rd1">Transparent <em>Pricing</em></h2>
+    <p class="section-sub reveal rd2" style="margin:0 auto">No hidden fees. No surprises. Just great websites at fair prices.</p>
+    <div class="plans-grid">
+      <div class="plan-card reveal rd1">
+        <div class="plan-name">Starter</div>
+        <div class="plan-desc">Perfect for getting online fast. A clean, professional single-page presence.</div>
+        <div class="plan-price"><span class="plan-price-cur">€</span><span class="plan-price-num">499</span><span class="plan-price-per">one-time</span></div>
+        <ul class="plan-feats">
+          <li><span class="chk">✓</span>Single page website</li>
+          <li><span class="chk">✓</span>Mobile responsive design</li>
+          <li><span class="chk">✓</span>Contact form</li>
+          <li><span class="chk">✓</span>Google Maps integration</li>
+          <li><span class="chk">✓</span>Basic SEO setup</li>
+          <li><span class="chk">✓</span>1 round of revisions</li>
+          <li><span class="chk">✓</span>Hosting setup included</li>
+        </ul>
+        <button class="plan-btn pbo" onclick="addToCart({id:'starter',name:'Starter Website',price:499,icon:'🌱'})">Add to Cart</button>
+      </div>
+      <div class="plan-card featured reveal rd2">
+        <div class="plan-badge">Most Popular</div>
+        <div class="plan-name">Growth</div>
+        <div class="plan-desc">Multi-page site with everything you need to grow your business online.</div>
+        <div class="plan-price"><span class="plan-price-cur">€</span><span class="plan-price-num">999</span><span class="plan-price-per">one-time</span></div>
+        <ul class="plan-feats">
+          <li><span class="chk">✓</span>Up to 5 pages</li>
+          <li><span class="chk">✓</span>Custom design</li>
+          <li><span class="chk">✓</span>Blog / News section</li>
+          <li><span class="chk">✓</span>Advanced SEO</li>
+          <li><span class="chk">✓</span>Google Analytics</li>
+          <li><span class="chk">✓</span>3 rounds of revisions</li>
+          <li><span class="chk">✓</span>1 month free support</li>
+          <li><span class="chk">✓</span>Hosting setup included</li>
+        </ul>
+        <button class="plan-btn pborg" onclick="addToCart({id:'growth',name:'Growth Package',price:999,icon:'🚀'})">Add to Cart</button>
+      </div>
+      <div class="plan-card reveal rd3">
+        <div class="plan-name">Premium</div>
+        <div class="plan-desc">Full e-commerce store with payments, inventory, and everything to sell online.</div>
+        <div class="plan-price"><span class="plan-price-cur">€</span><span class="plan-price-num">1,999</span><span class="plan-price-per">one-time</span></div>
+        <ul class="plan-feats">
+          <li><span class="chk">✓</span>Full e-commerce store</li>
+          <li><span class="chk">✓</span>Unlimited products</li>
+          <li><span class="chk">✓</span>Stripe / PayPal payments</li>
+          <li><span class="chk">✓</span>Order management dashboard</li>
+          <li><span class="chk">✓</span>Custom admin panel</li>
+          <li><span class="chk">✓</span>Unlimited revisions</li>
+          <li><span class="chk">✓</span>3 months free support</li>
+          <li><span class="chk">✓</span>Priority delivery</li>
+        </ul>
+        <button class="plan-btn pbdk" onclick="addToCart({id:'premium',name:'Premium Store',price:1999,icon:'💎'})">Add to Cart</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- QUOTE -->
+<section id="quote">
+  <div class="container">
+    <div class="quote-wrap">
+      <div>
+        <span class="section-tag reveal">Free Quote</span>
+        <h2 class="section-title reveal rd1">Get a <em>Custom Quote</em></h2>
+        <p class="section-sub reveal rd2">Not sure which plan suits you? Tell me about your project and I'll get back within 24 hours with a tailored quote — no obligation.</p>
+        <div class="qf-list reveal rd3">
+          <div class="qf-item"><div class="qf-icon">📬</div><div><div class="qf-title">Response within 24 hours</div><div class="qf-desc">I take every enquiry seriously</div></div></div>
+          <div class="qf-item"><div class="qf-icon">💬</div><div><div class="qf-title">Free consultation call</div><div class="qf-desc">We'll talk through exactly what you need</div></div></div>
+          <div class="qf-item"><div class="qf-icon">💰</div><div><div class="qf-title">Flexible pricing</div><div class="qf-desc">Custom projects priced fairly based on scope</div></div></div>
+        </div>
+      </div>
+      <div class="quote-form-box reveal rd2">
+        <form id="qform" onsubmit="submitQuote(event)">
+          <div class="fg">
+            <div class="fg-row"><label>Your Name *</label><input type="text" placeholder="John Smith" required></div>
+            <div class="fg-row"><label>Email *</label><input type="email" placeholder="john@business.com" required></div>
+            <div class="fg-row"><label>Phone</label><input type="tel" placeholder="+353 ..."></div>
+            <div class="fg-row"><label>Business Name</label><input type="text" placeholder="My Business"></div>
+            <div class="fg-row full"><label>Project Type *</label>
+              <select required>
+                <option value="">Select type...</option>
+                <option>Simple Landing Page</option>
+                <option>Multi-page Business Site</option>
+                <option>E-commerce Store</option>
+                <option>Blog / Portfolio</option>
+                <option>Other / Not Sure</option>
+              </select>
+            </div>
+            <div class="fg-row full"><label>Budget Range</label>
+              <select>
+                <option value="">Select budget...</option>
+                <option>Under €500</option>
+                <option>€500 – €1,000</option>
+                <option>€1,000 – €2,500</option>
+                <option>€2,500+</option>
+              </select>
+            </div>
+            <div class="fg-row full"><label>Tell me about your project *</label><textarea placeholder="Describe your business and what you need..." required></textarea></div>
+          </div>
+          <button type="submit" class="form-submit">Send My Quote Request →</button>
+          <div class="quote-success" id="qsuccess">✓ Thank you! I'll be in touch within 24 hours.</div>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section id="testimonials">
+  <div class="container" style="text-align:center">
+    <span class="section-tag reveal">Testimonials</span>
+    <h2 class="section-title reveal rd1">What Clients <em>Say</em></h2>
+    <div class="testi-grid">
+      <div class="tc reveal rd1"><div class="tc-stars">★★★★★</div><p class="tc-text">"Evan built us a stunning website in less than a week. Our bookings doubled in the first month. Can't recommend him enough!"</p><div class="tc-author"><div class="tc-av">SM</div><div><div class="tc-name">Sarah Murphy</div><div class="tc-biz">Murphy's Hair Studio, Cork</div></div></div></div>
+      <div class="tc reveal rd2"><div class="tc-stars">★★★★★</div><p class="tc-text">"Finally a developer who just gets it. Clear communication, fast work, and the result is absolutely class. Worth every cent."</p><div class="tc-author"><div class="tc-av">JK</div><div><div class="tc-name">James Kelly</div><div class="tc-biz">Kelly's Plumbing, Dublin</div></div></div></div>
+      <div class="tc reveal rd3"><div class="tc-stars">★★★★★</div><p class="tc-text">"The online store Evan built looks incredible and works perfectly. Customers keep complimenting it. Total game changer."</p><div class="tc-author"><div class="tc-av">AO</div><div><div class="tc-name">Aoife O'Brien</div><div class="tc-biz">The Little Candle Co., Galway</div></div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section id="faq">
+  <div class="container" style="text-align:center">
+    <span class="section-tag reveal">FAQ</span>
+    <h2 class="section-title reveal rd1">Common <em>Questions</em></h2>
+    <div class="faq-list">
+      <div class="faq-item"><button class="faq-q" onclick="toggleFaq(this)">How long does it take to build my website?<span class="faq-icon">+</span></button><div class="faq-a"><div class="faq-a-inner">Most projects are completed within 3–7 business days depending on complexity. The Starter plan can often go live in 2–3 days. I'll give you a clear timeline before we start.</div></div></div>
+      <div class="faq-item"><button class="faq-q" onclick="toggleFaq(this)">Do I need to provide content or images?<span class="faq-icon">+</span></button><div class="faq-a"><div class="faq-a-inner">Ideally yes — you know your business best. But if you don't have content ready, I can help write copy and source professional stock photography as part of your package.</div></div></div>
+      <div class="faq-item"><button class="faq-q" onclick="toggleFaq(this)">Will I be able to update the site myself?<span class="faq-icon">+</span></button><div class="faq-a"><div class="faq-a-inner">Yes! I build sites with easy-to-use content management in mind. I'll provide a walkthrough so you can update text, images, and products yourself without any coding.</div></div></div>
+      <div class="faq-item"><button class="faq-q" onclick="toggleFaq(this)">What payment methods do you accept?<span class="faq-icon">+</span></button><div class="faq-a"><div class="faq-a-inner">You can pay securely via Stripe (credit/debit card) directly through this website. For custom quotes, I also accept bank transfer. A 50% deposit is required to begin work.</div></div></div>
+      <div class="faq-item"><button class="faq-q" onclick="toggleFaq(this)">Do the plans include hosting?<span class="faq-icon">+</span></button><div class="faq-a"><div class="faq-a-inner">Hosting setup is included with all plans — I'll configure your chosen hosting provider. Ongoing hosting costs (typically €5–20/month) are billed directly to you by the provider.</div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <a href="#" class="nav-logo">EVAN<em>.</em>STUDIO</a>
+        <p>Web design for small businesses. Fast, affordable, and built to convert.</p>
+      </div>
+      <div class="fc"><h4>Navigation</h4><a href="#about">About</a><a href="#process">Process</a><a href="#plans">Plans</a><a href="#quote">Get a Quote</a><a href="#faq">FAQ</a></div>
+      <div class="fc"><h4>Plans</h4><a href="#plans">Starter — €499</a><a href="#plans">Growth — €999</a><a href="#plans">Premium — €1,999</a></div>
+      <div class="fc"><h4>Contact</h4><a href="mailto:hello@evanstudio.ie">hello@evanstudio.ie</a><a href="#quote">Get a Quote</a><a href="#" onclick="openAuth();return false">My Account</a></div>
+    </div>
+    <div class="footer-bottom"><span>© 2025 Evan Studio. All rights reserved.</span><span>Built with ❤️ in Ireland</span></div>
+  </div>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<!-- CART MODAL -->
+<div class="modal-overlay" id="cart-modal">
+  <div class="modal">
+    <div class="modal-hdr"><div class="modal-ttl">Your Cart</div><button class="modal-x" onclick="closeModal('cart-modal')">✕</button></div>
+    <div class="modal-body" id="cart-body"></div>
+  </div>
+</div>
+
+<!-- AUTH MODAL -->
+<div class="modal-overlay" id="auth-modal">
+  <div class="modal">
+    <div class="modal-hdr"><div class="modal-ttl" id="auth-ttl">Welcome Back</div><button class="modal-x" onclick="closeModal('auth-modal')">✕</button></div>
+    <div class="modal-body" id="auth-body"></div>
+  </div>
+</div>
+
+<!-- CHECKOUT MODAL -->
+<div class="modal-overlay" id="checkout-modal">
+  <div class="modal modal-wide">
+    <div class="modal-hdr"><div class="modal-ttl">Secure Checkout</div><button class="modal-x" onclick="closeModal('checkout-modal')">✕</button></div>
+    <div class="modal-body" id="checkout-body"></div>
+  </div>
+</div>
+
+<script>
+/* ══════════════════════════════════════════
+   ⚙️  CONFIG — Corrected Credentials
+══════════════════════════════════════════ */
+    const SUPABASE_URL     = 'https://mtmjyrlpegommlqytjge.supabase.co';
+    const SUPABASE_ANON    = 'sb_publishable_v59CknHRrQyKIvpiDx-jKw_pEe_mFDj';
+const STRIPE_PK        = 'pk_test_YOUR_STRIPE_PUBLISHABLE_KEY';
+
+/* ══════════════════════════════════════════
+   SUPABASE
+══════════════════════════════════════════ */
+let sb = null, currentUser = null;
+
+function initSupabase() {
+  try {
+    sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+    sb.auth.onAuthStateChange((_, session) => {
+      currentUser = session?.user || null;
+      updateUserBtn();
+    });
+    sb.auth.getSession().then(({ data }) => {
+      currentUser = data?.session?.user || null;
+      updateUserBtn();
+    });
+  } catch(e) { console.warn('Supabase: add your keys to activate auth', e); }
+}
+
+function updateUserBtn() {
+  const b = document.getElementById('user-btn');
+  if (currentUser) {
+    b.textContent = '👤 ' + currentUser.email.charAt(0).toUpperCase();
+    b.onclick = showAccountMenu;
+  } else {
+    b.textContent = '⚡ Sign In';
+    b.onclick = openAuth;
+  }
+}
+
+async function doLogin() {
+  if (!sb) return showAuthErr('Supabase not configured — add your API keys.');
+  const email = document.getElementById('ae').value.trim();
+  const pass  = document.getElementById('ap').value;
+  if (!email || !pass) return showAuthErr('Please fill in all fields.');
+  setAuthBtn('Logging in…', true);
+  const { error } = await sb.auth.signInWithPassword({ email, password: pass });
+  if (error) { showAuthErr(error.message); setAuthBtn('Log In →', false); }
+  else { toast('✓ Logged in!'); closeModal('auth-modal'); if (afterAuth) { afterAuth(); afterAuth = null; } }
+}
+
+async function doSignup() {
+  if (!sb) return showAuthErr('Supabase not configured — add your API keys.');
+  const email = document.getElementById('ae').value.trim();
+  const pass  = document.getElementById('ap').value;
+  const pass2 = document.getElementById('ap2').value;
+  if (!email || !pass) return showAuthErr('Please fill in all fields.');
+  if (pass !== pass2) return showAuthErr('Passwords do not match.');
+  if (pass.length < 8) return showAuthErr('Password must be at least 8 characters.');
+  setAuthBtn('Creating account…', true);
+  const { error } = await sb.auth.signUp({ email, password: pass });
+  if (error) { showAuthErr(error.message); setAuthBtn('Create Account →', false); }
+  else { toast('✓ Account created! Check your email to confirm.'); closeModal('auth-modal'); if (afterAuth) { afterAuth(); afterAuth = null; } }
+}
+
+async function doSignOut() {
+  if (sb) await sb.auth.signOut();
+  currentUser = null; updateUserBtn(); toast('Signed out');
+}
+
+function showAccountMenu() {
+  document.getElementById('auth-ttl').textContent = 'My Account';
+  document.getElementById('auth-body').innerHTML = `
+    <div style="text-align:center;padding:1rem 0">
+      <div style="width:60px;height:60px;border-radius:50%;background:var(--blk);color:var(--w);font-family:'Bebas Neue',sans-serif;font-size:1.8rem;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem">${currentUser?.email?.charAt(0)?.toUpperCase()}</div>
+      <div style="font-weight:600;margin-bottom:.3rem">${currentUser?.email}</div>
+      <div style="font-size:.78rem;color:var(--mid);margin-bottom:2rem">Signed in</div>
+      <button class="btn btn-outline" style="width:100%;justify-content:center;padding:.8rem;border-radius:100px" onclick="doSignOut();closeModal('auth-modal')">Sign Out</button>
+    </div>`;
+  openModal('auth-modal');
+}
+
+/* ══════════════════════════════════════════
+   CART
+══════════════════════════════════════════ */
+let cart = [];
+
+function addToCart(item) {
+  if (cart.find(i => i.id === item.id)) { toast(item.name + ' is already in your cart'); return; }
+  cart.push({...item});
+  updateCartBadge();
+  toast('✓ ' + item.name + ' added to cart');
+}
+
+function removeFromCart(id) { cart = cart.filter(i => i.id !== id); updateCartBadge(); renderCart(); }
+
+function updateCartBadge() {
+  const c = document.getElementById('cart-count');
+  if (cart.length === 0) { c.classList.add('hide'); return; }
+  c.classList.remove('hide'); c.textContent = cart.length;
+  c.classList.remove('pop'); void c.offsetWidth; c.classList.add('pop');
+}
+
+function cartTotal() { return cart.reduce((s, i) => s + i.price, 0); }
+
+function openCart() { renderCart(); openModal('cart-modal'); }
+
+function renderCart() {
+  const b = document.getElementById('cart-body');
+  if (!b) return;
+  if (cart.length === 0) {
+    b.innerHTML = `<div class="cart-empty"><div class="cart-empty-icon">🛒</div><div>Your cart is empty</div><a href="#plans" class="btn btn-dark" style="margin-top:1rem;display:inline-flex" onclick="closeModal('cart-modal')">Browse Plans</a></div>`;
+    return;
+  }
+  b.innerHTML = `
+    <div class="cart-items">${cart.map(i => `
+      <div class="cart-item">
+        <div class="ci-icon">${i.icon}</div>
+        <div class="ci-info"><div class="ci-name">${i.name}</div><div class="ci-price">€${i.price.toLocaleString()}</div></div>
+        <button class="ci-rm" onclick="removeFromCart('${i.id}')">✕</button>
+      </div>`).join('')}
+    </div>
+    <div class="cart-total"><span>Total</span><span class="cart-total-num">€${cartTotal().toLocaleString()}</span></div>
+    <button class="btn btn-orange btn-lg" style="width:100%;justify-content:center" onclick="proceedToCheckout()">Proceed to Checkout →</button>
+    <button class="btn btn-outline" style="width:100%;justify-content:center;margin-top:.6rem;border-radius:100px;padding:.7rem" onclick="closeModal('cart-modal')">Continue Shopping</button>`;
+}
+
+function proceedToCheckout() {
+  if (!cart.length) return;
+  closeModal('cart-modal');
+  if (!currentUser) openAuthForCheckout();
+  else openCheckout(false);
+}
+
+/* ══════════════════════════════════════════
+   AUTH MODAL
+══════════════════════════════════════════ */
+let afterAuth = null;
+
+function openAuth(cb) {
+  afterAuth = cb || null;
+  renderAuth('login');
+  openModal('auth-modal');
+}
+
+function openAuthForCheckout() {
+  afterAuth = () => openCheckout(false);
+  renderAuth('login');
+  openModal('auth-modal');
+}
+
+function renderAuth(tab) {
+  document.getElementById('auth-ttl').textContent = tab === 'login' ? 'Welcome Back' : 'Create Account';
+  document.getElementById('auth-body').innerHTML = `
+    <div class="auth-tabs">
+      <button class="auth-tab ${tab==='login'?'active':''}" onclick="renderAuth('login')">Log In</button>
+      <button class="auth-tab ${tab==='signup'?'active':''}" onclick="renderAuth('signup')">Sign Up</button>
+    </div>
+    <div class="auth-err" id="aerr"></div>
+    <div class="fg-row" style="margin-bottom:.9rem"><label>Email</label><input type="email" id="ae" placeholder="you@email.com"></div>
+    <div class="fg-row" style="margin-bottom:${tab==='signup'?'.9rem':'1.2rem'}"><label>Password</label><input type="password" id="ap" placeholder="••••••••" onkeydown="if(event.key==='Enter')${tab==='login'?'doLogin()':'doSignup()'}"></div>
+    ${tab==='signup'?`<div class="fg-row" style="margin-bottom:1.2rem"><label>Confirm Password</label><input type="password" id="ap2" placeholder="Repeat password" onkeydown="if(event.key==='Enter')doSignup()"></div>`:''}
+    <button class="form-submit" id="auth-submit-btn" onclick="${tab==='login'?'doLogin()':'doSignup()'}">
+      ${tab==='login'?'Log In →':'Create Account →'}
+    </button>
+    <div class="auth-div">or</div>
+    <button class="btn-guest" onclick="guestCheckout()">Continue as Guest</button>`;
+}
+
+function showAuthErr(msg) { const e = document.getElementById('aerr'); if(e){e.style.display='block';e.textContent=msg;} }
+function setAuthBtn(txt, dis) { const b = document.getElementById('auth-submit-btn'); if(b){b.textContent=txt;b.disabled=dis;} }
+function guestCheckout() { closeModal('auth-modal'); openCheckout(true); }
+
+/* ══════════════════════════════════════════
+   CHECKOUT + STRIPE
+══════════════════════════════════════════ */
+let stripe_obj, stripeEls, cardEl;
+
+function openCheckout(isGuest) {
+  if (!cart.length) return;
+  const summaryLines = cart.map(i => `<div class="sl"><span>${i.name}</span><span>€${i.price.toLocaleString()}</span></div>`).join('');
+  const guestFields = isGuest ? `
+    <div class="fg-row" style="margin-bottom:.8rem"><label>Full Name *</label><input type="text" id="co-name" placeholder="Your name"></div>
+    <div class="fg-row" style="margin-bottom:.8rem"><label>Email *</label><input type="email" id="co-email" placeholder="you@email.com"></div>` :
+    `<div style="font-size:.82rem;color:var(--mid);margin-bottom:1rem;padding:.6rem .8rem;background:var(--off);border-radius:var(--rs)">Logged in as <strong>${currentUser?.email}</strong></div>`;
+
+  document.getElementById('checkout-body').innerHTML = `
+    <div class="co-grid">
+      <div>
+        <h3 style="font-weight:700;margin-bottom:1rem;font-size:.9rem">Your Details</h3>
+        ${guestFields}
+        <h3 style="font-weight:700;margin-bottom:1rem;font-size:.9rem;margin-top:1.2rem">Payment</h3>
+        <div id="stripe-el"></div>
+        <div id="pay-msg"></div>
+        <button class="form-submit" id="pay-btn" onclick="submitPayment(${isGuest})">Pay €${cartTotal().toLocaleString()} Securely →</button>
+      </div>
+      <div>
+        <div class="co-summary">
+          <h3>Order Summary</h3>
+          ${summaryLines}
+          <div class="sl tot"><span>Total</span><span>€${cartTotal().toLocaleString()}</span></div>
+        </div>
+        <div style="margin-top:1rem;padding:.85rem;background:rgba(28,184,122,.06);border:1px solid rgba(28,184,122,.2);border-radius:var(--rs);font-size:.76rem;color:var(--mid);line-height:1.6">
+          🔒 Payments secured by Stripe. Your card data is never stored on our servers.
+        </div>
+      </div>
+    </div>`;
+  openModal('checkout-modal');
+  initStripe();
+}
+
+function initStripe() {
+  try {
+    stripe_obj = Stripe(STRIPE_PK);
+    stripeEls = stripe_obj.elements();
+    cardEl = stripeEls.create('card', {
+      style: { base: { fontFamily: "'DM Sans', sans-serif", fontSize: '15px', color: '#0d0d0d', '::placeholder': { color: '#c4c0bb' } } }
+    });
+    cardEl.mount('#stripe-el');
+  } catch(e) {
+    const el = document.getElementById('stripe-el');
+    if (el) el.innerHTML = '<div style="padding:.8rem;color:var(--org);font-size:.82rem;border:1px solid rgba(232,93,42,.2);border-radius:8px">⚠️ Add your Stripe publishable key to enable payments.</div>';
+  }
+}
+
+async function submitPayment(isGuest) {
+  const btn = document.getElementById('pay-btn');
+  const msg = document.getElementById('pay-msg');
+  if (isGuest) {
+    const name  = document.getElementById('co-name')?.value.trim();
+    const email = document.getElementById('co-email')?.value.trim();
+    if (!name || !email) { if(msg) msg.textContent = 'Please enter your name and email.'; return; }
+  }
+  if (!stripe_obj || !cardEl) {
+    if(msg) msg.textContent = '⚠️ Stripe not configured. Add your publishable key.';
+    return;
+  }
+  if (btn) { btn.textContent = 'Processing…'; btn.disabled = true; }
+  /*
+   * PRODUCTION: Call your backend to create a PaymentIntent:
+   *   const res = await fetch('/api/create-payment-intent', {
+   *     method: 'POST',
+   *     headers: { 'Content-Type': 'application/json' },
+   *     body: JSON.stringify({ amount: cartTotal() * 100, currency: 'eur' })
+   *   });
+   *   const { clientSecret } = await res.json();
+   *   const { paymentIntent, error } = await stripe_obj.confirmCardPayment(clientSecret, {
+   *     payment_method: { card: cardEl }
+   *   });
+   */
+  // DEMO simulation
+  setTimeout(() => {
+    cart = []; updateCartBadge(); closeModal('checkout-modal');
+    toast('✓ Payment successful! Confirmation email on its way.');
+    if (btn) { btn.textContent = 'Pay →'; btn.disabled = false; }
+  }, 1500);
+}
+
+/* ══════════════════════════════════════════
+   MODALS
+══════════════════════════════════════════ */
+function openModal(id)  { document.getElementById(id).classList.add('open');  document.body.style.overflow = 'hidden'; }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); document.body.style.overflow = ''; }
+
+document.querySelectorAll('.modal-overlay').forEach(o => {
+  o.addEventListener('click', e => { if (e.target === o) closeModal(o.id); });
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') document.querySelectorAll('.modal-overlay.open').forEach(o => closeModal(o.id));
+});
+
+/* ══════════════════════════════════════════
+   NAV / MOBILE
+══════════════════════════════════════════ */
+window.addEventListener('scroll', () => {
+  document.getElementById('nav').classList.toggle('scrolled', window.scrollY > 20);
+}, { passive: true });
+
+function toggleMobile() { document.getElementById('mobile-nav').classList.toggle('open'); document.getElementById('hamburger').classList.toggle('open'); }
+function closeMobile()  { document.getElementById('mobile-nav').classList.remove('open'); document.getElementById('hamburger').classList.remove('open'); }
+
+/* ══════════════════════════════════════════
+   MARQUEE
+══════════════════════════════════════════ */
+const items = ['Fast Delivery','Mobile Responsive','SEO Optimised','Stripe Payments','Custom Design','Irish Developer','Free Quote','No Templates'];
+const track = document.getElementById('mtrack');
+[...items,...items,...items,...items].forEach(t => {
+  const d = document.createElement('div'); d.className = 'mi';
+  d.innerHTML = `<span class="mi-dot"></span>${t}`; track.appendChild(d);
+});
+
+/* ══════════════════════════════════════════
+   SCROLL REVEAL
+══════════════════════════════════════════ */
+const ro = new IntersectionObserver(entries => entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); }), { threshold: 0.1 });
+document.querySelectorAll('.reveal').forEach(el => ro.observe(el));
+
+/* ══════════════════════════════════════════
+   HERO PARALLAX
+══════════════════════════════════════════ */
+window.addEventListener('scroll', () => {
+  const bg = document.querySelector('.hero-bg-text');
+  if (bg && window.scrollY < window.innerHeight)
+    bg.style.transform = `translateY(calc(-50% + ${window.scrollY * .15}px))`;
+}, { passive: true });
+
+/* ══════════════════════════════════════════
+   FAQ
+══════════════════════════════════════════ */
+function toggleFaq(btn) {
+  const item = btn.closest('.faq-item');
+  const open = item.classList.contains('open');
+  document.querySelectorAll('.faq-item.open').forEach(i => i.classList.remove('open'));
+  if (!open) item.classList.add('open');
+}
+
+/* ══════════════════════════════════════════
+   QUOTE FORM
+══════════════════════════════════════════ */
+function submitQuote(e) {
+  e.preventDefault();
+  const btn = e.target.querySelector('.form-submit');
+  btn.textContent = 'Sending…'; btn.disabled = true;
+  setTimeout(() => {
+    document.getElementById('qsuccess').style.display = 'block';
+    btn.textContent = '✓ Sent!'; e.target.reset();
+    setTimeout(() => { document.getElementById('qsuccess').style.display = 'none'; btn.textContent = 'Send My Quote Request →'; btn.disabled = false; }, 4000);
+  }, 900);
+}
+
+/* ══════════════════════════════════════════
+   TOAST
+══════════════════════════════════════════ */
+let toastTimer;
+function toast(msg) {
+  const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+/* INIT */
+initSupabase();
+</script>
+</body>
+</html>
