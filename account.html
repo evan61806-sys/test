@@ -1,1 +1,718 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Account — Evan Studio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Instrument+Serif:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root {
+  --w: #ffffff;
+  --off: #f8f6f2;
+  --cream: #f0ece4;
+  --blk: #0d0d0d;
+  --dark: #1c1c1c;
+  --mid: #707070;
+  --lt: #c4c0bb;
+  --bdr: #e8e4de;
+  --org: #2a40e8;
+  --grn: #1cb87a;
+  --red: #e83a2a;
+  --ylw: #e8a82a;
+  --sh: 0 2px 24px rgba(0,0,0,.07);
+  --sh-lg: 0 8px 48px rgba(0,0,0,.12);
+  --r: 14px;
+  --rs: 8px;
+  --tr: .22s cubic-bezier(.4,0,.2,1);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--off);color:var(--blk);min-height:100vh;line-height:1.65}
+a{text-decoration:none;color:inherit}
+button{font-family:inherit;cursor:pointer;border:none;outline:none}
+img{display:block;max-width:100%}
 
+/* NAV */
+#nav{position:fixed;top:0;left:0;right:0;z-index:200;height:66px;display:flex;align-items:center;justify-content:space-between;padding:0 5vw;background:rgba(255,255,255,.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--bdr)}
+.nav-logo{font-family:'Bebas Neue',sans-serif;font-size:1.7rem;letter-spacing:.06em;color:var(--blk)}
+.nav-logo em{color:var(--org);font-style:normal}
+.nav-right{display:flex;gap:.7rem;align-items:center}
+.btn{display:inline-flex;align-items:center;gap:.4rem;padding:.56rem 1.2rem;font-size:.82rem;font-weight:600;letter-spacing:.03em;border-radius:100px;transition:all var(--tr);white-space:nowrap;cursor:pointer;border:none}
+.btn-dark{background:var(--blk);color:var(--w)}.btn-dark:hover{background:var(--org)}
+.btn-outline{background:transparent;color:var(--blk);border:1.5px solid var(--bdr)}.btn-outline:hover{border-color:var(--blk);background:var(--blk);color:var(--w)}
+.btn-sm{padding:.42rem .9rem;font-size:.76rem}
+
+/* LAYOUT */
+.page-wrap{display:grid;grid-template-columns:260px 1fr;min-height:100vh;padding-top:66px}
+
+/* SIDEBAR */
+.sidebar{background:var(--w);border-right:1px solid var(--bdr);padding:2rem 0;position:sticky;top:66px;height:calc(100vh - 66px);overflow-y:auto;display:flex;flex-direction:column}
+.sidebar-user{padding:1.5rem 1.5rem 1.8rem;border-bottom:1px solid var(--bdr);margin-bottom:1rem}
+.su-av{width:52px;height:52px;border-radius:50%;background:var(--blk);color:var(--w);font-family:'Bebas Neue',sans-serif;font-size:1.6rem;display:flex;align-items:center;justify-content:center;margin-bottom:.8rem}
+.su-name{font-weight:700;font-size:.95rem;margin-bottom:.15rem}
+.su-email{font-size:.76rem;color:var(--mid);word-break:break-all}
+.su-badge{display:inline-flex;align-items:center;gap:.35rem;background:rgba(28,184,122,.1);color:var(--grn);font-size:.68rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:.22rem .65rem;border-radius:100px;margin-top:.6rem}
+.nav-section{padding:0 1rem;margin-bottom:.3rem}
+.nav-section-label{font-size:.65rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--lt);padding:.5rem .6rem;margin-bottom:.2rem}
+.nav-item{display:flex;align-items:center;gap:.75rem;padding:.72rem .9rem;border-radius:var(--rs);font-size:.85rem;font-weight:500;color:var(--mid);cursor:pointer;transition:all var(--tr);width:100%;background:none;border:none;text-align:left}
+.nav-item:hover{background:var(--off);color:var(--blk)}
+.nav-item.active{background:var(--blk);color:var(--w)}
+.nav-item .ni-icon{font-size:1rem;width:20px;text-align:center;flex-shrink:0}
+.nav-item .ni-badge{margin-left:auto;background:var(--org);color:var(--w);font-size:.62rem;font-weight:700;padding:.15rem .45rem;border-radius:100px;min-width:18px;text-align:center}
+.sidebar-footer{margin-top:auto;padding:1.2rem 1.5rem;border-top:1px solid var(--bdr)}
+.sf-signout{width:100%;padding:.65rem;background:none;border:1.5px solid var(--bdr);border-radius:100px;font-size:.8rem;font-weight:600;color:var(--mid);cursor:pointer;transition:all var(--tr)}
+.sf-signout:hover{border-color:var(--red);color:var(--red);background:rgba(232,58,42,.04)}
+
+/* MAIN */
+.main-content{padding:2.5rem 3vw;max-width:1000px}
+.page-header{margin-bottom:2.2rem}
+.page-header h1{font-family:'Bebas Neue',sans-serif;font-size:2.6rem;letter-spacing:.03em;line-height:1}
+.page-header p{color:var(--mid);font-size:.9rem;margin-top:.4rem}
+
+/* TABS */
+.tab-pane{display:none}
+.tab-pane.active{display:block}
+
+/* STAT CARDS */
+.stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem;margin-bottom:2rem}
+.stat-card{background:var(--w);border:1px solid var(--bdr);border-radius:var(--r);padding:1.4rem 1.5rem;transition:all var(--tr)}
+.stat-card:hover{box-shadow:var(--sh);transform:translateY(-2px)}
+.sc-label{font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--mid);margin-bottom:.6rem}
+.sc-val{font-family:'Bebas Neue',sans-serif;font-size:2.2rem;letter-spacing:.03em;line-height:1;margin-bottom:.25rem}
+.sc-sub{font-size:.75rem;color:var(--mid)}
+.sc-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:.4rem}
+
+/* CARDS */
+.card{background:var(--w);border:1px solid var(--bdr);border-radius:var(--r);overflow:hidden;margin-bottom:1.5rem}
+.card-hdr{display:flex;align-items:center;justify-content:space-between;padding:1.2rem 1.5rem;border-bottom:1px solid var(--bdr)}
+.card-hdr h2{font-weight:700;font-size:.95rem}
+.card-body{padding:1.5rem}
+
+/* ORDERS TABLE */
+.orders-table{width:100%;border-collapse:collapse}
+.orders-table th{font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--mid);text-align:left;padding:.6rem 1rem;border-bottom:1.5px solid var(--bdr);background:var(--off)}
+.orders-table td{padding:.95rem 1rem;border-bottom:1px solid var(--bdr);font-size:.85rem;vertical-align:middle}
+.orders-table tr:last-child td{border-bottom:none}
+.orders-table tr:hover td{background:var(--off)}
+.status-badge{display:inline-flex;align-items:center;gap:.3rem;padding:.28rem .7rem;border-radius:100px;font-size:.7rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase}
+.sb-paid{background:rgba(28,184,122,.1);color:var(--grn)}
+.sb-pending{background:rgba(232,168,42,.1);color:var(--ylw)}
+.sb-unpaid{background:rgba(232,58,42,.1);color:var(--red)}
+.sb-progress{background:rgba(42,64,232,.1);color:var(--org)}
+.order-icon{width:34px;height:34px;border-radius:8px;background:var(--off);border:1px solid var(--bdr);display:flex;align-items:center;justify-content:center;font-size:.95rem;flex-shrink:0}
+.order-name-cell{display:flex;align-items:center;gap:.75rem}
+.on-info .on-title{font-weight:600;font-size:.85rem}
+.on-info .on-id{font-size:.72rem;color:var(--mid);font-family:monospace}
+.pay-btn-sm{padding:.36rem .85rem;background:var(--org);color:var(--w);border-radius:100px;font-size:.73rem;font-weight:600;border:none;cursor:pointer;transition:all var(--tr)}
+.pay-btn-sm:hover{background:#1d2fc0;transform:translateY(-1px)}
+
+/* SITE CARDS */
+.sites-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1.2rem}
+.site-card{background:var(--w);border:1.5px solid var(--bdr);border-radius:var(--r);overflow:hidden;transition:all var(--tr)}
+.site-card:hover{box-shadow:var(--sh-lg);transform:translateY(-3px);border-color:var(--org)}
+.site-preview{height:120px;background:linear-gradient(135deg,var(--blk) 0%,#2a2a2a 100%);position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center}
+.site-preview-label{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:.1em;color:rgba(255,255,255,.15)}
+.site-preview-dot{position:absolute;top:.8rem;right:.8rem;width:8px;height:8px;border-radius:50%;background:var(--grn);box-shadow:0 0 8px rgba(28,184,122,.5)}
+.site-preview-dot.offline{background:var(--red);box-shadow:0 0 8px rgba(232,58,42,.5)}
+.site-body{padding:1.2rem}
+.site-name{font-weight:700;font-size:.9rem;margin-bottom:.2rem}
+.site-url{font-size:.75rem;color:var(--org);font-weight:500;margin-bottom:.8rem}
+.site-meta{display:flex;gap:1rem;margin-bottom:1rem}
+.sm-item{display:flex;align-items:center;gap:.3rem;font-size:.72rem;color:var(--mid)}
+.site-actions{display:flex;gap:.5rem}
+.site-btn{flex:1;padding:.5rem;background:var(--off);border:1px solid var(--bdr);border-radius:var(--rs);font-size:.75rem;font-weight:600;cursor:pointer;transition:all var(--tr);text-align:center}
+.site-btn:hover{background:var(--blk);color:var(--w);border-color:var(--blk)}
+.site-btn.primary{background:var(--blk);color:var(--w);border-color:var(--blk)}
+.site-btn.primary:hover{background:var(--org);border-color:var(--org)}
+
+/* PROFILE FORM */
+.profile-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem}
+.fg-row{display:flex;flex-direction:column;gap:.4rem}
+.fg-row.full{grid-column:1/-1}
+label{font-size:.78rem;font-weight:600;letter-spacing:.03em;color:var(--dark)}
+input,textarea,select{width:100%;padding:.7rem 1rem;background:var(--off);border:1.5px solid var(--bdr);border-radius:var(--rs);font-family:inherit;font-size:.88rem;color:var(--blk);transition:border-color var(--tr)}
+input:focus,textarea:focus,select:focus{outline:none;border-color:var(--blk);background:var(--w)}
+textarea{resize:vertical;min-height:90px}
+.save-btn{padding:.75rem 2rem;background:var(--blk);color:var(--w);border-radius:100px;font-size:.85rem;font-weight:600;border:none;cursor:pointer;transition:all var(--tr);margin-top:.5rem}
+.save-btn:hover{background:var(--org);transform:translateY(-1px)}
+.save-btn:disabled{opacity:.5;cursor:not-allowed}
+
+/* NOTIFICATIONS / MESSAGES */
+.notif-list{display:flex;flex-direction:column;gap:.8rem}
+.notif-item{display:flex;gap:1rem;align-items:flex-start;padding:1rem 1.2rem;background:var(--off);border:1px solid var(--bdr);border-radius:var(--rs);transition:all var(--tr)}
+.notif-item:hover{border-color:var(--blk)}
+.notif-item.unread{background:rgba(42,64,232,.04);border-color:rgba(42,64,232,.2)}
+.ni-dot{width:8px;height:8px;border-radius:50%;background:var(--org);flex-shrink:0;margin-top:.4rem}
+.ni-dot.read{background:var(--lt)}
+.ni-body{flex:1}
+.ni-title{font-weight:600;font-size:.86rem;margin-bottom:.2rem}
+.ni-msg{font-size:.8rem;color:var(--mid);line-height:1.6}
+.ni-time{font-size:.72rem;color:var(--lt);margin-top:.3rem}
+.ni-actions{flex-shrink:0}
+
+/* INVOICE */
+.invoice-card{background:var(--w);border:1px solid var(--bdr);border-radius:var(--r);padding:1.5rem;margin-bottom:1rem;display:flex;align-items:center;gap:1.2rem;transition:all var(--tr)}
+.invoice-card:hover{box-shadow:var(--sh);transform:translateY(-1px)}
+.inv-icon{width:44px;height:44px;border-radius:10px;background:var(--off);border:1px solid var(--bdr);display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0}
+.inv-info{flex:1}
+.inv-name{font-weight:700;font-size:.9rem;margin-bottom:.2rem}
+.inv-date{font-size:.76rem;color:var(--mid)}
+.inv-amount{font-family:'Bebas Neue',sans-serif;font-size:1.5rem;letter-spacing:.03em;margin-right:1rem}
+.inv-download{padding:.4rem .9rem;background:var(--off);border:1.5px solid var(--bdr);border-radius:100px;font-size:.75rem;font-weight:600;cursor:pointer;transition:all var(--tr)}
+.inv-download:hover{border-color:var(--blk);background:var(--blk);color:var(--w)}
+
+/* EMPTY STATE */
+.empty-state{text-align:center;padding:3.5rem 2rem;color:var(--mid)}
+.es-icon{font-size:2.8rem;margin-bottom:.8rem;opacity:.3}
+.es-title{font-weight:700;font-size:.95rem;margin-bottom:.4rem;color:var(--blk)}
+.es-sub{font-size:.82rem}
+
+/* AUTH WALL */
+#auth-wall{display:none;position:fixed;inset:0;background:var(--off);z-index:500;flex-direction:column;align-items:center;justify-content:center;padding:2rem}
+#auth-wall.show{display:flex}
+.aw-box{background:var(--w);border:1.5px solid var(--bdr);border-radius:24px;padding:2.8rem;width:100%;max-width:420px;text-align:center}
+.aw-logo{font-family:'Bebas Neue',sans-serif;font-size:1.8rem;letter-spacing:.06em;margin-bottom:1.8rem;display:block}
+.aw-logo em{color:var(--org);font-style:normal}
+.aw-title{font-family:'Bebas Neue',sans-serif;font-size:2rem;letter-spacing:.04em;margin-bottom:.5rem}
+.aw-sub{font-size:.85rem;color:var(--mid);margin-bottom:1.8rem}
+.auth-tabs{display:flex;background:var(--off);border-radius:100px;padding:4px;margin-bottom:1.5rem}
+.auth-tab{flex:1;padding:.6rem;border-radius:100px;font-size:.82rem;font-weight:600;background:none;border:none;cursor:pointer;color:var(--mid);transition:all .2s}
+.auth-tab.active{background:var(--blk);color:var(--w)}
+.auth-field{text-align:left;margin-bottom:.9rem}
+.auth-field label{font-size:.78rem;font-weight:600;letter-spacing:.03em;color:var(--dark);display:block;margin-bottom:.4rem}
+.auth-submit{width:100%;padding:.85rem;background:var(--blk);color:var(--w);border-radius:100px;font-size:.88rem;font-weight:600;border:none;cursor:pointer;transition:all var(--tr);margin-top:.5rem}
+.auth-submit:hover{background:var(--org)}
+.auth-submit:disabled{opacity:.5;cursor:not-allowed}
+.auth-err{background:rgba(232,58,42,.08);border:1px solid rgba(232,58,42,.2);border-radius:var(--rs);padding:.7rem 1rem;font-size:.8rem;color:var(--red);margin-bottom:.8rem;display:none;text-align:left}
+
+/* LOADING */
+.skeleton{background:linear-gradient(90deg,var(--off) 25%,var(--cream) 50%,var(--off) 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;border-radius:6px;height:16px}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+/* TOAST */
+.toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(20px);background:var(--blk);color:var(--w);padding:.75rem 1.5rem;border-radius:100px;font-size:.85rem;font-weight:500;z-index:999;opacity:0;transition:all .3s ease;white-space:nowrap;pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* MODALS */
+.modal-overlay{position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.5);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:1rem;opacity:0;pointer-events:none;transition:opacity .25s}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal{background:var(--w);border-radius:20px;width:100%;max-width:500px;overflow:hidden;transform:scale(.96) translateY(12px);transition:transform .28s cubic-bezier(.34,1.56,.64,1)}
+.modal-overlay.open .modal{transform:scale(1) translateY(0)}
+.modal-hdr{padding:1.4rem 1.6rem;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--bdr)}
+.modal-hdr h3{font-weight:700;font-size:1rem}
+.modal-x{width:32px;height:32px;border-radius:50%;background:var(--off);border:1.5px solid var(--bdr);display:flex;align-items:center;justify-content:center;font-size:.9rem;color:var(--mid);cursor:pointer;transition:all var(--tr)}
+.modal-x:hover{background:var(--blk);color:var(--w);border-color:var(--blk)}
+.modal-body{padding:1.5rem 1.6rem 2rem}
+
+/* RESPONSIVE */
+@media(max-width:860px){
+  .page-wrap{grid-template-columns:1fr}
+  .sidebar{position:static;height:auto;flex-direction:row;flex-wrap:wrap;gap:.4rem;padding:1rem;border-right:none;border-bottom:1px solid var(--bdr)}
+  .sidebar-user{display:none}
+  .sidebar-footer{display:none}
+  .nav-section{padding:0}
+  .nav-section-label{display:none}
+  .nav-item{padding:.55rem .75rem;font-size:.78rem}
+  .main-content{padding:1.5rem 4vw}
+  .stat-row{grid-template-columns:1fr 1fr}
+  .sites-grid{grid-template-columns:1fr}
+  .profile-grid{grid-template-columns:1fr}
+}
+@media(max-width:520px){
+  .stat-row{grid-template-columns:1fr}
+  .orders-table thead{display:none}
+  .orders-table td{display:block;padding:.5rem 1rem}
+  .orders-table td::before{content:attr(data-label);font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--mid);display:block;margin-bottom:.15rem}
+}
+</style>
+</head>
+<body>
+
+<nav id="nav">
+  <a href="index.html" class="nav-logo">EVAN<em>.</em>STUDIO</a>
+  <div class="nav-right">
+    <a href="index.html" class="btn btn-outline btn-sm">← Back to Site</a>
+    <button class="btn btn-dark btn-sm" onclick="signOut()">Sign Out</button>
+  </div>
+</nav>
+
+<!-- AUTH WALL -->
+<div id="auth-wall" class="show">
+  <a class="aw-logo">EVAN<em>.</em>STUDIO</a>
+  <div class="aw-box">
+    <div class="aw-title">My Account</div>
+    <div class="aw-sub">Sign in to view your orders, sites, and invoices.</div>
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tab-login" onclick="switchAuthTab('login')">Log In</button>
+      <button class="auth-tab" id="tab-signup" onclick="switchAuthTab('signup')">Sign Up</button>
+    </div>
+    <div class="auth-err" id="aw-err"></div>
+    <div class="auth-field"><label>Email</label><input type="email" id="aw-email" placeholder="you@email.com"></div>
+    <div class="auth-field"><label>Password</label><input type="password" id="aw-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doAuth()"></div>
+    <div class="auth-field" id="confirm-field" style="display:none"><label>Confirm Password</label><input type="password" id="aw-pass2" placeholder="••••••••"></div>
+    <button class="auth-submit" id="aw-submit" onclick="doAuth()">Log In →</button>
+  </div>
+</div>
+
+<div class="page-wrap" id="page-wrap" style="display:none">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-user">
+      <div class="su-av" id="sb-av">?</div>
+      <div class="su-name" id="sb-name">Loading…</div>
+      <div class="su-email" id="sb-email"></div>
+      <div class="su-badge">● Active Client</div>
+    </div>
+    <div class="nav-section">
+      <div class="nav-section-label">Menu</div>
+      <button class="nav-item active" onclick="showTab('overview',this)"><span class="ni-icon">🏠</span>Overview</button>
+      <button class="nav-item" onclick="showTab('orders',this)"><span class="ni-icon">📋</span>Orders<span class="ni-badge" id="unpaid-badge" style="display:none">!</span></button>
+      <button class="nav-item" onclick="showTab('sites',this)"><span class="ni-icon">🌐</span>My Sites</button>
+      <button class="nav-item" onclick="showTab('invoices',this)"><span class="ni-icon">🧾</span>Invoices</button>
+      <button class="nav-item" onclick="showTab('messages',this)"><span class="ni-icon">💬</span>Messages</button>
+      <button class="nav-item" onclick="showTab('profile',this)"><span class="ni-icon">👤</span>Profile</button>
+    </div>
+    <div class="sidebar-footer">
+      <button class="sf-signout" onclick="signOut()">Sign Out</button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main-content">
+
+    <!-- OVERVIEW TAB -->
+    <div class="tab-pane active" id="tab-overview">
+      <div class="page-header">
+        <h1>Welcome back<span id="overview-name"></span></h1>
+        <p>Here's a summary of your account activity.</p>
+      </div>
+      <div class="stat-row">
+        <div class="stat-card">
+          <div class="sc-label">Total Orders</div>
+          <div class="sc-val" id="stat-total">—</div>
+          <div class="sc-sub">all time</div>
+        </div>
+        <div class="stat-card">
+          <div class="sc-label">Amount Due</div>
+          <div class="sc-val" id="stat-due" style="color:var(--red)">—</div>
+          <div class="sc-sub">outstanding balance</div>
+        </div>
+        <div class="stat-card">
+          <div class="sc-label">Active Sites</div>
+          <div class="sc-val" id="stat-sites">—</div>
+          <div class="sc-sub">live right now</div>
+        </div>
+      </div>
+
+      <!-- Recent Orders -->
+      <div class="card">
+        <div class="card-hdr">
+          <h2>Recent Orders</h2>
+          <button class="btn btn-outline btn-sm" onclick="showTab('orders',null)">View All</button>
+        </div>
+        <div style="overflow-x:auto">
+          <table class="orders-table" id="recent-orders-table">
+            <thead><tr><th>Project</th><th>Plan</th><th>Amount</th><th>Status</th><th>Date</th><th></th></tr></thead>
+            <tbody id="recent-orders-body"><tr><td colspan="6" style="padding:2rem;text-align:center;color:var(--mid)">Loading…</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Quick actions -->
+      <div class="card">
+        <div class="card-hdr"><h2>Quick Actions</h2></div>
+        <div class="card-body" style="display:flex;gap:.8rem;flex-wrap:wrap">
+          <a href="index.html#plans" class="btn btn-dark">+ New Project</a>
+          <a href="index.html#quote" class="btn btn-outline">Request Quote</a>
+          <button class="btn btn-outline" onclick="showTab('messages',null)">💬 Message Evan</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ORDERS TAB -->
+    <div class="tab-pane" id="tab-orders">
+      <div class="page-header">
+        <h1>Orders</h1>
+        <p>Track all your projects and outstanding payments.</p>
+      </div>
+      <div class="card">
+        <div class="card-hdr"><h2>All Orders</h2><span id="orders-count" style="font-size:.8rem;color:var(--mid)"></span></div>
+        <div style="overflow-x:auto">
+          <table class="orders-table" id="all-orders-table">
+            <thead><tr><th>Project</th><th>Plan</th><th>Amount</th><th>Status</th><th>Date</th><th></th></tr></thead>
+            <tbody id="all-orders-body"><tr><td colspan="6" style="padding:2rem;text-align:center;color:var(--mid)">Loading…</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- SITES TAB -->
+    <div class="tab-pane" id="tab-sites">
+      <div class="page-header">
+        <h1>My Sites</h1>
+        <p>All websites we've built for you.</p>
+      </div>
+      <div class="sites-grid" id="sites-grid">
+        <div style="grid-column:1/-1;padding:3rem 0;text-align:center;color:var(--mid)">Loading…</div>
+      </div>
+    </div>
+
+    <!-- INVOICES TAB -->
+    <div class="tab-pane" id="tab-invoices">
+      <div class="page-header">
+        <h1>Invoices</h1>
+        <p>Download your invoices and receipts.</p>
+      </div>
+      <div id="invoices-list">
+        <div style="padding:2rem;text-align:center;color:var(--mid)">Loading…</div>
+      </div>
+    </div>
+
+    <!-- MESSAGES TAB -->
+    <div class="tab-pane" id="tab-messages">
+      <div class="page-header">
+        <h1>Messages</h1>
+        <p>Communications from Evan about your projects.</p>
+      </div>
+      <div id="messages-list">
+        <div style="padding:2rem;text-align:center;color:var(--mid)">Loading…</div>
+      </div>
+    </div>
+
+    <!-- PROFILE TAB -->
+    <div class="tab-pane" id="tab-profile">
+      <div class="page-header">
+        <h1>Profile Settings</h1>
+        <p>Update your account details.</p>
+      </div>
+      <div class="card">
+        <div class="card-hdr"><h2>Personal Information</h2></div>
+        <div class="card-body">
+          <div class="profile-grid">
+            <div class="fg-row"><label>Full Name</label><input type="text" id="p-name" placeholder="Your full name"></div>
+            <div class="fg-row"><label>Business Name</label><input type="text" id="p-biz" placeholder="Your business"></div>
+            <div class="fg-row"><label>Email</label><input type="email" id="p-email" placeholder="you@email.com"></div>
+            <div class="fg-row"><label>Phone</label><input type="tel" id="p-phone" placeholder="+353 ..."></div>
+            <div class="fg-row full"><label>Address</label><input type="text" id="p-address" placeholder="Your address"></div>
+            <div class="fg-row full"><label>Notes for Evan</label><textarea id="p-notes" placeholder="Anything you'd like Evan to know..."></textarea></div>
+          </div>
+          <button class="save-btn" onclick="saveProfile()" id="save-profile-btn">Save Changes</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-hdr"><h2>Change Password</h2></div>
+        <div class="card-body">
+          <div class="profile-grid">
+            <div class="fg-row"><label>New Password</label><input type="password" id="new-pass" placeholder="New password"></div>
+            <div class="fg-row"><label>Confirm Password</label><input type="password" id="new-pass2" placeholder="Repeat new password"></div>
+          </div>
+          <button class="save-btn" onclick="changePassword()">Update Password</button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- PAY MODAL -->
+<div class="modal-overlay" id="pay-modal">
+  <div class="modal">
+    <div class="modal-hdr"><h3>Pay Outstanding Balance</h3><button class="modal-x" onclick="closeModal('pay-modal')">✕</button></div>
+    <div class="modal-body" id="pay-modal-body"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const SUPABASE_URL  = 'https://mtmjyrlpegommlqytjge.supabase.co';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im10bWp5cmxwZWdvbW1scXl0amdzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgzMzA5NDQsImV4cCI6MjA5MzkwNjk0NH0.I_uQgspIEhrfNjBBA9u99Os3lA8QaH7jzDCwNWlf0Fo';
+
+let sb, currentUser, profile = {};
+let authMode = 'login';
+
+/* ── INIT ── */
+window.addEventListener('DOMContentLoaded', async () => {
+  sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+  sb.auth.onAuthStateChange(async (_, session) => {
+    if (session?.user) {
+      currentUser = session.user;
+      showDashboard();
+      await loadAll();
+    } else {
+      currentUser = null;
+      showAuthWall();
+    }
+  });
+  const { data } = await sb.auth.getSession();
+  if (data?.session?.user) {
+    currentUser = data.session.user;
+    showDashboard();
+    await loadAll();
+  } else {
+    showAuthWall();
+  }
+});
+
+function showAuthWall() {
+  document.getElementById('auth-wall').classList.add('show');
+  document.getElementById('page-wrap').style.display = 'none';
+}
+function showDashboard() {
+  document.getElementById('auth-wall').classList.remove('show');
+  document.getElementById('page-wrap').style.display = 'grid';
+}
+
+/* ── AUTH ── */
+function switchAuthTab(mode) {
+  authMode = mode;
+  document.getElementById('tab-login').classList.toggle('active', mode === 'login');
+  document.getElementById('tab-signup').classList.toggle('active', mode === 'signup');
+  document.getElementById('confirm-field').style.display = mode === 'signup' ? 'flex' : 'none';
+  document.getElementById('aw-submit').textContent = mode === 'login' ? 'Log In →' : 'Create Account →';
+  document.getElementById('aw-err').style.display = 'none';
+}
+async function doAuth() {
+  const email = document.getElementById('aw-email').value.trim();
+  const pass  = document.getElementById('aw-pass').value;
+  const errEl = document.getElementById('aw-err');
+  const btn   = document.getElementById('aw-submit');
+  if (!email || !pass) { showAwErr('Please fill in all fields.'); return; }
+  btn.textContent = 'Please wait…'; btn.disabled = true;
+  let error;
+  if (authMode === 'login') {
+    ({ error } = await sb.auth.signInWithPassword({ email, password: pass }));
+  } else {
+    const pass2 = document.getElementById('aw-pass2')?.value;
+    if (pass !== pass2) { showAwErr('Passwords do not match.'); btn.textContent = 'Create Account →'; btn.disabled = false; return; }
+    ({ error } = await sb.auth.signUp({ email, password: pass }));
+    if (!error) toast('✓ Account created! Check your email to confirm.');
+  }
+  if (error) { showAwErr(error.message); btn.textContent = authMode === 'login' ? 'Log In →' : 'Create Account →'; btn.disabled = false; }
+  else { btn.textContent = authMode === 'login' ? 'Log In →' : 'Create Account →'; btn.disabled = false; }
+}
+function showAwErr(m) { const e = document.getElementById('aw-err'); e.textContent = m; e.style.display = 'block'; }
+async function signOut() { await sb.auth.signOut(); toast('Signed out'); }
+
+/* ── LOAD ALL ── */
+async function loadAll() {
+  await loadProfile();
+  await loadOrders();
+  await loadSites();
+  await loadInvoices();
+  await loadMessages();
+}
+
+/* ── PROFILE ── */
+async function loadProfile() {
+  const { data } = await sb.from('profiles').select('*').eq('id', currentUser.id).single();
+  profile = data || {};
+  const name = profile.full_name || currentUser.email.split('@')[0];
+  const initials = name.charAt(0).toUpperCase();
+  document.getElementById('sb-av').textContent = initials;
+  document.getElementById('sb-name').textContent = name;
+  document.getElementById('sb-email').textContent = currentUser.email;
+  document.getElementById('overview-name').textContent = profile.full_name ? ', ' + profile.full_name.split(' ')[0] : '';
+  document.getElementById('p-name').value = profile.full_name || '';
+  document.getElementById('p-biz').value = profile.business_name || '';
+  document.getElementById('p-email').value = currentUser.email;
+  document.getElementById('p-phone').value = profile.phone || '';
+  document.getElementById('p-address').value = profile.address || '';
+  document.getElementById('p-notes').value = profile.notes || '';
+}
+async function saveProfile() {
+  const btn = document.getElementById('save-profile-btn');
+  btn.textContent = 'Saving…'; btn.disabled = true;
+  const updates = {
+    id: currentUser.id,
+    full_name: document.getElementById('p-name').value,
+    business_name: document.getElementById('p-biz').value,
+    phone: document.getElementById('p-phone').value,
+    address: document.getElementById('p-address').value,
+    notes: document.getElementById('p-notes').value,
+    updated_at: new Date().toISOString()
+  };
+  const { error } = await sb.from('profiles').upsert(updates);
+  btn.textContent = 'Save Changes'; btn.disabled = false;
+  if (error) toast('Error: ' + error.message);
+  else { toast('✓ Profile saved!'); await loadProfile(); }
+}
+async function changePassword() {
+  const p1 = document.getElementById('new-pass').value;
+  const p2 = document.getElementById('new-pass2').value;
+  if (!p1) { toast('Enter a new password'); return; }
+  if (p1 !== p2) { toast('Passwords do not match'); return; }
+  const { error } = await sb.auth.updateUser({ password: p1 });
+  if (error) toast('Error: ' + error.message);
+  else { toast('✓ Password updated!'); document.getElementById('new-pass').value = ''; document.getElementById('new-pass2').value = ''; }
+}
+
+/* ── ORDERS ── */
+async function loadOrders() {
+  const { data: orders } = await sb.from('orders').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
+  const list = orders || [];
+  const total = list.length;
+  const unpaid = list.filter(o => o.status === 'unpaid' || o.status === 'pending');
+  const due = unpaid.reduce((s, o) => s + (o.amount || 0), 0);
+  document.getElementById('stat-total').textContent = total;
+  document.getElementById('stat-due').textContent = due > 0 ? '€' + due.toLocaleString() : '€0';
+  const unpaidBadge = document.getElementById('unpaid-badge');
+  if (unpaid.length > 0) { unpaidBadge.style.display = 'flex'; unpaidBadge.textContent = unpaid.length; }
+  document.getElementById('orders-count').textContent = total + ' order' + (total !== 1 ? 's' : '');
+  const rows = renderOrderRows(list.slice(0, 5));
+  document.getElementById('recent-orders-body').innerHTML = rows || '<tr><td colspan="6" style="padding:2rem;text-align:center;color:var(--mid)">No orders yet</td></tr>';
+  const allRows = renderOrderRows(list);
+  document.getElementById('all-orders-body').innerHTML = allRows || '<tr><td colspan="6" style="padding:2rem;text-align:center;color:var(--mid)">No orders yet. <a href="index.html#plans" style="color:var(--org);font-weight:600">Browse plans →</a></td></tr>';
+}
+const PLAN_ICONS = { starter: '🌱', growth: '🚀', premium: '💎', custom: '⚙️' };
+const STATUS_CLASSES = { paid: 'sb-paid', pending: 'sb-pending', unpaid: 'sb-unpaid', 'in-progress': 'sb-progress', completed: 'sb-paid', cancelled: 'sb-unpaid' };
+function renderOrderRows(list) {
+  if (!list.length) return null;
+  return list.map(o => {
+    const icon = PLAN_ICONS[o.plan_id] || '📦';
+    const sc = STATUS_CLASSES[o.status] || 'sb-pending';
+    const label = o.status ? o.status.replace('-', ' ') : 'pending';
+    const date = o.created_at ? new Date(o.created_at).toLocaleDateString('en-IE', { day: 'numeric', month: 'short', year: 'numeric' }) : '—';
+    const payAction = (o.status === 'unpaid' || o.status === 'pending') ? `<button class="pay-btn-sm" onclick="openPayModal('${o.id}','${o.plan_name || o.plan_id}',${o.amount || 0})">Pay Now</button>` : '<span style="color:var(--mid);font-size:.78rem">—</span>';
+    return `<tr>
+      <td data-label="Project"><div class="order-name-cell"><div class="order-icon">${icon}</div><div class="on-info"><div class="on-title">${o.plan_name || o.plan_id || 'Project'}</div><div class="on-id">#${o.id?.slice(0,8) || '—'}</div></div></div></td>
+      <td data-label="Plan">${o.plan_id || '—'}</td>
+      <td data-label="Amount"><strong>€${(o.amount || 0).toLocaleString()}</strong></td>
+      <td data-label="Status"><span class="status-badge ${sc}">● ${label}</span></td>
+      <td data-label="Date">${date}</td>
+      <td>${payAction}</td>
+    </tr>`;
+  }).join('');
+}
+
+/* ── SITES ── */
+async function loadSites() {
+  const { data: sites } = await sb.from('sites').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
+  const list = sites || [];
+  document.getElementById('stat-sites').textContent = list.filter(s => s.status === 'live').length;
+  const grid = document.getElementById('sites-grid');
+  if (!list.length) {
+    grid.innerHTML = `<div style="grid-column:1/-1"><div class="empty-state"><div class="es-icon">🌐</div><div class="es-title">No sites yet</div><div class="es-sub">Your websites will appear here once your project begins.</div><a href="index.html#plans" class="btn btn-dark" style="margin-top:1.2rem;display:inline-flex">View Plans</a></div></div>`;
+    return;
+  }
+  grid.innerHTML = list.map(s => {
+    const live = s.status === 'live';
+    return `<div class="site-card">
+      <div class="site-preview">
+        <div class="site-preview-label">${(s.name || 'Site').toUpperCase()}</div>
+        <div class="site-preview-dot ${live ? '' : 'offline'}"></div>
+      </div>
+      <div class="site-body">
+        <div class="site-name">${s.name || 'Untitled Site'}</div>
+        ${s.url ? `<div class="site-url">🔗 ${s.url}</div>` : '<div class="site-url" style="color:var(--mid)">URL pending</div>'}
+        <div class="site-meta">
+          <div class="sm-item">📦 ${s.plan_name || s.plan_id || 'Custom'}</div>
+          <div class="sm-item" style="color:${live ? 'var(--grn)' : 'var(--ylw)'}">● ${s.status || 'in progress'}</div>
+        </div>
+        <div class="site-actions">
+          ${s.url ? `<a href="${s.url}" target="_blank" class="site-btn primary">Visit Site</a>` : '<span class="site-btn" style="opacity:.4;cursor:not-allowed">Not Live Yet</span>'}
+          <button class="site-btn" onclick="toast('Support request sent!')">Request Support</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ── INVOICES ── */
+async function loadInvoices() {
+  const { data: invoices } = await sb.from('invoices').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
+  const list = invoices || [];
+  const container = document.getElementById('invoices-list');
+  if (!list.length) {
+    container.innerHTML = `<div class="empty-state"><div class="es-icon">🧾</div><div class="es-title">No invoices yet</div><div class="es-sub">Invoices will appear here once your project is confirmed.</div></div>`;
+    return;
+  }
+  container.innerHTML = list.map(inv => {
+    const sc = STATUS_CLASSES[inv.status] || 'sb-pending';
+    const label = inv.status || 'pending';
+    const date = inv.created_at ? new Date(inv.created_at).toLocaleDateString('en-IE', { day: 'numeric', month: 'short', year: 'numeric' }) : '—';
+    return `<div class="invoice-card">
+      <div class="inv-icon">🧾</div>
+      <div class="inv-info">
+        <div class="inv-name">${inv.description || 'Invoice'}</div>
+        <div class="inv-date">${date} · <span class="status-badge ${sc}" style="padding:.15rem .5rem;font-size:.65rem">${label}</span></div>
+      </div>
+      <div class="inv-amount">€${(inv.amount || 0).toLocaleString()}</div>
+      ${inv.pdf_url ? `<button class="inv-download" onclick="window.open('${inv.pdf_url}','_blank')">⬇ PDF</button>` : `<button class="inv-download" onclick="toast('PDF coming soon!')">⬇ PDF</button>`}
+    </div>`;
+  }).join('');
+}
+
+/* ── MESSAGES ── */
+async function loadMessages() {
+  const { data: msgs } = await sb.from('messages').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
+  const list = msgs || [];
+  const container = document.getElementById('messages-list');
+  if (!list.length) {
+    container.innerHTML = `<div class="empty-state"><div class="es-icon">💬</div><div class="es-title">No messages yet</div><div class="es-sub">Evan will send project updates here.</div></div>`;
+    return;
+  }
+  container.innerHTML = `<div class="notif-list">${list.map(m => {
+    const unread = !m.read_at;
+    const date = m.created_at ? new Date(m.created_at).toLocaleString('en-IE', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '';
+    return `<div class="notif-item ${unread ? 'unread' : ''}">
+      <div class="ni-dot ${unread ? '' : 'read'}"></div>
+      <div class="ni-body">
+        <div class="ni-title">${m.subject || 'Message from Evan'}</div>
+        <div class="ni-msg">${m.body || ''}</div>
+        <div class="ni-time">${date}</div>
+      </div>
+    </div>`;
+  }).join('')}</div>`;
+}
+
+/* ── PAY MODAL ── */
+function openPayModal(orderId, planName, amount) {
+  document.getElementById('pay-modal-body').innerHTML = `
+    <div style="background:var(--off);border-radius:var(--r);padding:1.2rem;margin-bottom:1.2rem">
+      <div style="display:flex;justify-content:space-between;align-items:center;font-size:.88rem">
+        <span style="color:var(--mid)">Order</span><strong>${planName}</strong>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;font-size:1rem;margin-top:.5rem">
+        <span style="color:var(--mid)">Amount Due</span><strong style="font-family:'Bebas Neue',sans-serif;font-size:1.8rem">€${amount.toLocaleString()}</strong>
+      </div>
+    </div>
+    <p style="font-size:.82rem;color:var(--mid);margin-bottom:1.2rem;line-height:1.7">You'll be redirected to a secure Stripe checkout page to complete payment.</p>
+    <button class="save-btn" style="width:100%;text-align:center;border-radius:100px" onclick="simulatePay('${orderId}')">Pay €${amount.toLocaleString()} Securely →</button>
+    <div style="margin-top:.8rem;font-size:.73rem;color:var(--lt);text-align:center">🔒 Powered by Stripe. Card data never stored.</div>`;
+  document.getElementById('pay-modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+async function simulatePay(orderId) {
+  toast('Redirecting to Stripe…');
+  // In production: redirect to Stripe Checkout URL from your backend
+  // window.location.href = stripeCheckoutUrl;
+  setTimeout(async () => {
+    const { error } = await sb.from('orders').update({ status: 'paid' }).eq('id', orderId);
+    if (!error) {
+      toast('✓ Payment successful!');
+      closeModal('pay-modal');
+      await loadOrders();
+    }
+  }, 1000);
+}
+
+/* ── TABS ── */
+function showTab(name, btn) {
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  if (btn) { document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active')); btn.classList.add('active'); }
+  document.querySelector('.main-content').scrollTop = 0;
+}
+
+/* ── HELPERS ── */
+function closeModal(id) { document.getElementById(id)?.classList.remove('open'); document.body.style.overflow = ''; }
+document.querySelectorAll('.modal-overlay').forEach(o => o.addEventListener('click', e => { if (e.target === o) closeModal(o.id); }));
+let toastT;
+function toast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 3000); }
+</script>
+</body>
+</html>
